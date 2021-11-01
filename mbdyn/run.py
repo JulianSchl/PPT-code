@@ -1,30 +1,9 @@
-import logging
-#from matplotlib import pyplot as plt 
-import precice
-import time
-import subprocess
-from .rotation import *		#rotation.py
-from .csvreader import *	#csvreader.py
-import pathlib
-import numpy as np
-import decimal
-from .mbdynAdapter.prep import MBDynPrep
-import socket
-import errno
-from scipy import interpolate
-import colorama
-from .socketTools import *# SocketTools as s
+#import packages
 
 class MbdynAdapter:
-
 	#initialize values
-	colorama.init(autoreset=True)
 	
-	from .initialize import __init__
-	
-	#run preCICE coupling
 	def run(self):
-		s = SocketTools()
 		interface = precice.Interface(self.participant_name, self.configuration_file_name,
 				                      self.solver_process_index, self.solver_process_size)
 
