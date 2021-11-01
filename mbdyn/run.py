@@ -4,54 +4,6 @@ class MbdynAdapter:
 	#initialize values
 	
 	def run(self):
-		interface = precice.Interface(self.participant_name, self.configuration_file_name,
-				                      self.solver_process_index, self.solver_process_size)
-
-		for i in self.mesh_name:
-			self.mesh_id.append(interface.get_mesh_id(str(i)))
-		dimensions = interface.get_dimensions()
-		
-		for i in range(self.patches):
-			self.patch.append(Rotation())
-			XA, YA, ZA = np.hsplit(csvImport(self.current_path + '/../' + self.fluid_folder_name + '/patch' + str(i+1) + '.csv'),3)	#if mesh is in file
-			self.patch[i].importGrid(csvImport(self.current_path + '/../' + self.fluid_folder_name + '/patch' + str(i+1) + '.csv'))
-			#import ipdb; ipdb.set_trace()
-			self.vertices.append(np.array([XA.flatten(),YA.flatten(),ZA.flatten()]).T)
-			
-		if not (len(self.vertices) == len(self.mesh_id)):
-			exit("Cannot match mesh to vertices")
-		
-		#interpolate from beam to airfoil
-		for i in range(self.patches):
-			x = self.vertices[i][:,0]
-			x = np.roll(x, -1)
-			x = np.split(x,2)
-			y = self.vertices[i][:,1]
-			y = np.roll(y, -1)
-			y = np.split(y,2)
-			y_min = np.array((np.array(y[0]).min(axis=0),np.array(y[1]).min(axis=0))).max(axis=0)
-			y_max = np.array((np.array(y[0]).max(axis=0),np.array(y[1]).max(axis=0))).min(axis=0)
-			y_center = y_min + (y_max-y_min)/2
-			num_of_points = 11
-			
-			#x = f(y)
-			f = [interpolate.interp1d(y[0],x[0]),interpolate.interp1d(y[1],x[1])]
-			ynew = [np.linspace(y_min,y_max,11),np.linspace(y_min,y_max,11)]
-			xnew = [f[0](ynew[0]),f[1](ynew[1])]
-			
-			#x[0] rechts
-			#x[1] links
-			#von links nach rechts
-			airfoil_mesh = np.concatenate(np.array((np.array((xnew[1],ynew[1],np.zeros((xnew[1].size)))) ,np.array((xnew[0],ynew[0],np.zeros((xnew[0].size)))))),axis=1)
-			self.vertices[i] = airfoil_mesh.T
-
-			self.vertex_ids.append(interface.set_mesh_vertices(self.mesh_id[i],self.vertices[i]))
-			self.read_data_id.append(interface.get_data_id(self.read_data_name[i], self.mesh_id[i]))
-			self.write_data_id.append(interface.get_data_id(self.write_data_name[i], self.mesh_id[i]))
-		
-		print("trying to connect to socket stream...")
-		self.exchange_socket = s.patchConnect(self.patches+1)
-		print(u'\u2705' + " " + colorama.Style.BRIGHT + colorama.Back.WHITE + colorama.Fore.GREEN + str(self.patches+2) + " socket(s) connected")
 		
 		dt = interface.initialize()
 		
